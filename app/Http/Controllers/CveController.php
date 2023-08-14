@@ -58,14 +58,17 @@ class CveController extends Controller
 
         try {
 
+            $oldCves = cve::all();
 
-            $response = Http::get('https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName=' . $input['cpe_name']);
+            $oldCvesArray = $oldCves->pluck('id', 'id_cve')->toArray();
+
+            $response = Http::timeout(30)->get('https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName=' . $input['cpe_name']);
             $data = $response->json();
 
             //$dataDecoded = json_decode($data);
             $dataDecoded = $data;
 
-            //dd($data);
+            //dd($oldCvesArray);
 
             $definitions = $dataDecoded['vulnerabilities'];
 
@@ -73,31 +76,31 @@ class CveController extends Controller
 
                 //DB::beginTransaction();
 
-                $urlReferences = [];
+                if (!isset($oldCvesArray[$vulnerability['cve']['id']])) {
+                    //dd($vulnerability['cve']['id']);
 
-                foreach ($vulnerability['cve']['references'] as $reference) {
-                    $urlReferences[] = $reference['url'];
-                }
+                    $urlReferences = [];
 
-                $url_recerences = implode(',', $urlReferences);
+                    foreach ($vulnerability['cve']['references'] as $reference) {
+                        $urlReferences[] = $reference['url'];
+                    }
 
-                $cveArr = [
-                    'id_cve' => $vulnerability['cve']['id'],
-                    'description' => $vulnerability['cve']['descriptions'][0]['value'],
-                    'last_update' => $vulnerability['cve']['lastModified'],
-                    'publication_date' => $vulnerability['cve']['published'],
-                    'threat' => $vulnerability['cve']['weaknesses'][0]['description'][0]['value'],
-                    'threat_score' => $vulnerability['cve']['metrics']['cvssMetricV2'][0]['cvssData']['baseScore'],
-                    'url_recerences' => $url_recerences,
-                    'json' => json_encode($vulnerability)
-                ];
+                    $url_recerences = implode(',', $urlReferences);
 
-                //dd($cveArr);
-                //cve::create($cveArr);
+                    $cveArr = [
+                        'id_cve' => $vulnerability['cve']['id'],
+                        'description' => $vulnerability['cve']['descriptions'][0]['value'],
+                        'last_update' => $vulnerability['cve']['lastModified'],
+                        'publication_date' => $vulnerability['cve']['published'],
+                        'threat' => $vulnerability['cve']['weaknesses'][0]['description'][0]['value'],
+                        'threat_score' => $vulnerability['cve']['metrics']['cvssMetricV2'][0]['cvssData']['baseScore'],
+                        'url_recerences' => $url_recerences,
+                        'json' => json_encode($vulnerability)
+                    ];
 
-                $old = cve::where('id_cve', $cveArr['id_cve'])->first();
+                    //dd($cveArr);
+                    //cve::create($cveArr);
 
-                if (!empty($old)) {
                     $NewCve = new cve();
                     $NewCve->id_cve = $cveArr['id_cve'];
                     $NewCve->description = $cveArr['description'];
