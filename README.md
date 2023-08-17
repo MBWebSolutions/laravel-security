@@ -13,9 +13,9 @@
 
 ## Funzioni
 
-- Proteione tramite login
+- Protezione tramite login
 - Creazione utente
-- Lettura API dei dati della CVE relatina al CpeName indiacato
+- Lettura API dei dati della CVE relatina al CpeName indicato
 - Salvataggio dati API
 - Elenco delle CVE salvate
 - Visualizzazione dedicata alla singola CVE con lo storico dei cambiamenti
@@ -39,4 +39,4 @@ Una volta che questi siano soddisfatti la procedura di installazione deve essere
 
 ## Utilizzo
 
-Ad ogni avvio dell'applicazione deve essere eseguito il comando <b>npm run dev</b>, a questo punto l'applicazione sarà fruibile all'indirizzo http://localhost/laravel_security/public/
+Ad ogni avvio dell'applicazione deve essere eseguito il comando <b>npm run dev</b>, a questo punto l'applicazione sarà fruibile all'indirizzo  http://....../laravel_security/public/
